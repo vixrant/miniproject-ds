@@ -2,12 +2,15 @@
 ## Data Structures Mini Project
 -----
 
-*Author:* Vikrant Gajria
-*SAP ID:* 60004170119
-*Batch:* Computer Engineering Batch B
-*Semester:* 2
-*Year:* 2017 - 2021
+*Author:* Vikrant Gajria<br>
+*SAP ID:* 60004170119<br>
+*Batch:* Computer Engineering Batch B<br>
+*Semester:* 2<br>
+*Year:* 2017 - 2021<br>
 
 -----
 
-*Compiler:* GCC 4.2.1 (clang-1000.11.45.2)
+*Compiler:* GCC 4.2.1 (clang-1000.11.45.2)<br>
+*C specification:* C99<br>
+
+-----
