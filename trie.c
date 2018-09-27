@@ -121,3 +121,20 @@ int printAutoSuggestions(node* trie, char* query) {
         return 1;
     }
 }
+
+// -----
+
+void setup () {
+    FILE *fp = fopen("dataset.txt", "r");
+    while (!feof(fp)) {
+        char *word[100];
+        fscanf(fp, "%s", word);
+        printf("%s", word);
+    }
+    fclose(fp);
+}
+
+void main () {
+    printf("hello");
+    setup();
+}
