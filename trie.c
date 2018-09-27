@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define ALPHABET_RANGE 26 // 26 Alphabets + 4 extra characters.
 #define CHAR_TO_INDEX(c) ((int)c - (int)'a') // Macro to convert character to index.
@@ -56,10 +57,67 @@ void insert (node *trie, char *word) {
 
 // ! NOTE: I am omitting the search function.
 
+// Returns true if the node is a leaf node.
 bool isLeaf (node *t) {
+    // Check if all the children are null.
     for (int i = 0; i < ALPHABET_RANGE; i++) {
         if (t->children [i] != NULL)
             return false;
     }
     return true;
+}
+
+// -----
+
+// Recursive function to print auto-suggestions for given node.
+void suggestionsRec(node *root, char* currentPrefix) {
+    // Found a string in Trie with the given prefix
+    if (root->isEnd) {
+        printf("%s", currentPrefix);
+    }
+
+    // All children struct node pointers are NULL
+    if (isLeaf(root)) return;
+ 
+    for (int i = 0; i < ALPHABET_RANGE; i++) {
+        if (root->children[i]) {
+            // append current character to current prefix string.
+            char *toAppend = 97 + i;
+            strcat(currentPrefix, toAppend);
+            // recur over the rest
+            suggestionsRec(root->children[i], currentPrefix);
+        }
+    }
+}
+ 
+// Print suggestions for given query prefix.
+int printAutoSuggestions(node* trie, char* query) {
+    node* current = trie;
+ 
+    // Check if prefix is present and find the node (of last level) with last character of given query.
+    int n = strlen(query);
+    for (int i = 0; i < n; i++) {
+        int index = CHAR_TO_INDEX( *(query + i) );
+        // No string in the Trie has this prefix
+        if (!current->children[index]) return 0;
+        // If string in the Trie, go down a level.
+        else current = current->children[index];
+    }
+ 
+    // If prefix is present as a word.
+    bool isWord = current->isEnd;
+    // If prefix is last node of tree (has no children).
+    bool isLast = isLeaf(current);
+ 
+    // If prefix is present as a word, but there is no subtree below the last matching node.
+    if (isWord && isLast) {
+        printf("%s", query);
+        return -1;
+    }
+ 
+    // If there are are nodes below last matching character.
+    if (!isLast) {
+        suggestionsRec(current, query);
+        return 1;
+    }
 }
