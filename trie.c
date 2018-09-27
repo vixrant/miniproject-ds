@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -82,8 +83,8 @@ void suggestionsRec(node *root, char* currentPrefix) {
     for (int i = 0; i < ALPHABET_RANGE; i++) {
         if (root->children[i]) {
             // append current character to current prefix string.
-            char *toAppend = 97 + i;
-            strcat(currentPrefix, toAppend);
+            char toAppend = 97 + i;
+            strcat(currentPrefix, &toAppend);
             // recur over the rest
             suggestionsRec(root->children[i], currentPrefix);
         }
@@ -120,6 +121,8 @@ int printAutoSuggestions(node* trie, char* query) {
         suggestionsRec(current, query);
         return 1;
     }
+
+    return 1;
 }
 
 // -----
@@ -127,14 +130,13 @@ int printAutoSuggestions(node* trie, char* query) {
 void setup () {
     FILE *fp = fopen("dataset.txt", "r");
     while (!feof(fp)) {
-        char *word[100];
+        char word[100];
         fscanf(fp, "%s", word);
-        printf("%s", word);
+        printf("%s ", word);
     }
     fclose(fp);
 }
 
-void main () {
-    printf("hello");
+int main () {
     setup();
 }
