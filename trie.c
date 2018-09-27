@@ -12,27 +12,38 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 
-#define ALPHABET_RANGE 26 // 26 Alphabets + 4 extra characters.
-#define CHAR_TO_INDEX(c) ((int)c - (int)'a') // Macro to convert character to index.
+// * Constants
+#define ALPHABET_RANGE 26
+#define WORD_SIZE 50
+#define DATAFILE "dataset.txt"
 
-// Create a new datatype node.
+// * Parameterised macros.
+#define CHAR_TO_INDEX(c) ((int)tolower (c) - (int)'a') // Macro to convert character to index.
+#define INDEX_TO_CHAR(i) (char) ( (int)'a' + i)
+
+// * Create a new datatype node.
 typedef struct TrieNode {
-    // Children is an array of pointers, hence we have O(1) access.
-    struct TrieNode* children[ALPHABET_RANGE];
+    // Children is an array of pointers, hence we have O (1) access.
+    struct TrieNode* children [ALPHABET_RANGE];
     // Mark the end of a word.
     bool isEnd;
 } node;
 
+/************************************************************
+ *                      TRIE OPERATIONS                     *
+ ************************************************************/
+
 // Returns a new node structure.
 node* createNode () {
-    node *newNode = (node *)malloc(sizeof (node));
+    node *newNode = (node *)malloc (sizeof (node));
 
     // Mark as not the end of the word.
     newNode->isEnd = false;
     // Set all children to null.
     for (int i = 0; i < ALPHABET_RANGE; i++)
-        newNode->children[i] = NULL;
+        newNode->children [i] = NULL;
 
     return newNode;
 }
@@ -46,17 +57,15 @@ void insert (node *trie, char *word) {
 
     do {
         // Check if alphabet was added as a child. If not, add.
-        int i = CHAR_TO_INDEX(*word);
+        int i = CHAR_TO_INDEX (*word);
         if (root->children [i] == NULL)
-            root->children [i] = createNode();
+            root->children [i] = createNode ();
         // Go down the level of the subtrie.
         root = root->children [i];
-    } while (*(++word) != '\0'); // Till the word isn't terminated.
+    } while (* (++word) != '\0'); // Till the word isn't terminated.
     // Finally mark the last letter as end of word.
     root->isEnd = true;
 }
-
-// ! NOTE: I am omitting the search function.
 
 // Returns true if the node is a leaf node.
 bool isLeaf (node *t) {
@@ -68,75 +77,120 @@ bool isLeaf (node *t) {
     return true;
 }
 
-// -----
+// ! NOTE: I am omitting the search function as it is not required.
+
+/************************************************************
+ *                      DEBUG FUNCTIONS                     * 
+ ************************************************************/
+
+// Helper function to print the word found
+void printWord (char* str, int n)
+{
+    printf ("\n");
+    for (int i = 0; i < n; i++)
+    {
+        printf ("%c ", str [i]);
+    }
+}
+// Print all words in Trie
+void printAllWords (node* root, char* wordArray, int pos)
+{
+   if (root == NULL)
+      return;
+   
+   if (root->isEnd)
+   {
+      printWord (wordArray, pos);
+   }
+   for (int i=0; i<ALPHABET_RANGE; i++)
+   {
+      if (root->children [i] != NULL)
+      {
+         wordArray [pos] = i+'a';
+         printAllWords (root->children [i], wordArray, pos+1);
+      }
+   }
+}
+
+/************************************************************
+ *                   AUTOSUGGEST SYSTEM                     *
+ ************************************************************/
 
 // Recursive function to print auto-suggestions for given node.
-void suggestionsRec(node *root, char* currentPrefix) {
-    // Found a string in Trie with the given prefix
-    if (root->isEnd) {
-        printf("%s", currentPrefix);
-    }
+void suggestionsRec (node *root, char prefix []) {
+    // Found a string in Trie with the given prefix.
+    if (root->isEnd)
+        printf ("%s\n", prefix);
 
-    // All children struct node pointers are NULL
-    if (isLeaf(root)) return;
+    // All children struct node pointers are NULL.
+    if (isLeaf (root)) return;
  
     for (int i = 0; i < ALPHABET_RANGE; i++) {
-        if (root->children[i]) {
+        if (root->children [i]) {
             // append current character to current prefix string.
-            char toAppend = 97 + i;
-            strcat(currentPrefix, &toAppend);
+            char newPrefix [ALPHABET_RANGE];
+            strcpy (newPrefix, prefix);
+            strcat (newPrefix, (char [2]){INDEX_TO_CHAR (i), '\0'});
             // recur over the rest
-            suggestionsRec(root->children[i], currentPrefix);
+            suggestionsRec (root->children [i], newPrefix);
         }
     }
 }
  
 // Print suggestions for given query prefix.
-int printAutoSuggestions(node* trie, char* query) {
-    node* current = trie;
+int getSuggestions (node* trie, char query []) {
+    node* trav = trie;
  
-    // Check if prefix is present and find the node (of last level) with last character of given query.
-    int n = strlen(query);
+    // Check if query is present and find the node (of last level) with last character of given query.
+    int n = strlen (query);
     for (int i = 0; i < n; i++) {
-        int index = CHAR_TO_INDEX( *(query + i) );
+        int index = CHAR_TO_INDEX (query [i]);
         // No string in the Trie has this prefix
-        if (!current->children[index]) return 0;
+        if (!trav->children [index]) return 0;
         // If string in the Trie, go down a level.
-        else current = current->children[index];
+        else trav = trav->children [index];
     }
+
+    // If query is present as a word.
+    bool isWord = trav->isEnd;
+    // If query is last node of tree (has no children).
+    bool isLast = isLeaf (trav);
  
-    // If prefix is present as a word.
-    bool isWord = current->isEnd;
-    // If prefix is last node of tree (has no children).
-    bool isLast = isLeaf(current);
- 
-    // If prefix is present as a word, but there is no subtree below the last matching node.
+    // If the entire query is present but no subtree.
     if (isWord && isLast) {
-        printf("%s", query);
+        printf ("%s", query);
         return -1;
     }
  
     // If there are are nodes below last matching character.
     if (!isLast) {
-        suggestionsRec(current, query);
+        char prefix [100];
+        strcpy (prefix, query); // since pass by reference.
+        suggestionsRec (trav, prefix);
         return 1;
     }
 
-    return 1;
+    return 0;
 }
 
-// -----
+/************************************************************
+ *                        MAIN PROGRAM                      *
+ ************************************************************/
 
-void setup () {
-    FILE *fp = fopen("dataset.txt", "r");
-    while (!feof(fp)) {
-        char word[100];
-        fscanf(fp, "%s", word);
-        printf("%s ", word);
+// Set up the Trie.
+void setup (node **trie, char filename []) {
+    FILE *fp = fopen (filename, "r");
+    while (!feof (fp)) {
+        char word [100];
+        fscanf (fp, "%s", word);
+        insert (*trie, word);
     }
-    fclose(fp);
+    fclose (fp);
 }
 
+// Execute program.
 int main () {
-    setup();
+    node *trie = createNode ();
+    setup (&trie, DATAFILE);
+    getSuggestions (trie, "pr");
 }
