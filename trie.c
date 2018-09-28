@@ -129,7 +129,7 @@ void suggestionsRec(node *root, char prefix []) {
             char newPrefix [ALPHABET_RANGE];
             strcpy(newPrefix, prefix);
             strcat(newPrefix,(char [2]){INDEX_TO_CHAR(i), '\0'});
-            // recur over the rest
+            // recur over the rest.
             suggestionsRec(root->children [i], newPrefix);
         }
     }
@@ -142,9 +142,8 @@ int getSuggestions(node* trie, char query []) {
     int n = strlen(query);
     for(int i = 0; i < n; i++) {
         int index = CHAR_TO_INDEX(query [i]);
-        // No string in the Trie has this prefix
+        // No string in the Trie has this prefix, return. Else go down a level.
         if(!trie->children [index]) return 0;
-        // If string in the Trie, go down a level.
         else trie = trie->children [index];
     }
 
