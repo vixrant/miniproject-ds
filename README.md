@@ -14,3 +14,5 @@
 *C specification:* C99<br>
 
 -----
+
+*Dataset used:* [MIT 10000 wordlist](http://www.mit.edu/~ecprice/wordlist.10000)
