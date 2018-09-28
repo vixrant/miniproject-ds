@@ -49,11 +49,9 @@ node* createNode () {
 }
 
 // Insert a node into the tree.
-void insert (node *trie, char *word) {
+void insert (node *root, char *word) {
     // Return for null word.
     if (*word == '\0') return;
-    // Traversing pointer.
-    node *root = trie;
 
     do {
         // Check if alphabet was added as a child. If not, add.
@@ -139,22 +137,21 @@ void suggestionsRec (node *root, char prefix []) {
  
 // Print suggestions for given query prefix.
 int getSuggestions (node* trie, char query []) {
-    node* trav = trie;
  
     // Check if query is present and find the node (of last level) with last character of given query.
     int n = strlen (query);
     for (int i = 0; i < n; i++) {
         int index = CHAR_TO_INDEX (query [i]);
         // No string in the Trie has this prefix
-        if (!trav->children [index]) return 0;
+        if (!trie->children [index]) return 0;
         // If string in the Trie, go down a level.
-        else trav = trav->children [index];
+        else trie = trie->children [index];
     }
 
     // If query is present as a word.
-    bool isWord = trav->isEnd;
+    bool isWord = trie->isEnd;
     // If query is last node of tree (has no children).
-    bool isLast = isLeaf (trav);
+    bool isLast = isLeaf (trie);
  
     // If the entire query is present but no subtree.
     if (isWord && isLast) {
@@ -166,7 +163,7 @@ int getSuggestions (node* trie, char query []) {
     if (!isLast) {
         char prefix [100];
         strcpy (prefix, query); // since pass by reference.
-        suggestionsRec (trav, prefix);
+        suggestionsRec (trie, prefix);
         return 1;
     }
 
@@ -179,6 +176,7 @@ int getSuggestions (node* trie, char query []) {
 
 // Set up the Trie.
 void setup (node **trie, char filename []) {
+    // 
     FILE *fp = fopen (filename, "r");
     while (!feof (fp)) {
         char word [100];
@@ -190,7 +188,15 @@ void setup (node **trie, char filename []) {
 
 // Execute program.
 int main () {
+    // Create tree.
     node *trie = createNode ();
+    // Set it up with dataset.
     setup (&trie, DATAFILE);
-    getSuggestions (trie, "pr");
+
+    // Input.
+    char q[WORD_SIZE];
+    printf(">>> ");
+    scanf("%s", q);
+    // Print suggestionss
+    getSuggestions(trie, q);
 }
