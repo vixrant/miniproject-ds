@@ -175,7 +175,7 @@ int getSuggestions(node* trie, char query []) {
 
 // Set up the Trie.
 void setup(node **trie, char filename []) {
-    // 
+    // Open the file in read mode and scan individual words.
     FILE *fp = fopen(filename, "r");
     while(!feof(fp)) {
         char word [100];
