@@ -2,6 +2,8 @@
 ## Data Structures Mini Project
 -----
 
+[DOCUMENTATION](./documentation.pdf)
+
 *Author:* Vikrant Gajria<br>
 *SAP ID:* 60004170119<br>
 *Batch:* Computer Engineering Batch B<br>
